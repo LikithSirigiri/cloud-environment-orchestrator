@@ -93,4 +93,4 @@ Terraform itself is never run standalone against a real client in this workflow 
 
 ## License
 
-MIT — see [LICENSE](LICENSE). This is a portfolio excerpt of a private production system; see [SANITIZATION.md](SANITIZATION.md) for exactly what was changed or removed before publishing.
+MIT — see [LICENSE](LICENSE).
