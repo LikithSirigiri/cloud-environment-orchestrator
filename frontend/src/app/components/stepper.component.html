@@ -1,0 +1,38 @@
+<div class="flex items-center w-full relative">
+  <ng-container *ngFor="let step of steps; let last = last; let i = index">
+    
+    <!-- Divider Line (Horizontal) -->
+    <div *ngIf="i !== 0" class="flex-1 h-0.5 mx-4" 
+         [ngClass]="step.status === 'completed' || step.status === 'current' ? 'bg-[#00E4D0]' : 'bg-slate-700'">
+    </div>
+
+    <div class="flex items-center gap-3 relative shrink-0">
+      <!-- Icon -->
+      <div class="relative z-10 shrink-0">
+        <!-- Completed Step -->
+        <div *ngIf="step.status === 'completed'" class="w-8 h-8 rounded-full bg-[#00E4D0] text-slate-900 flex items-center justify-center shadow-[0_0_15px_-3px_rgba(0,228,208,0.5)]">
+          <lucide-icon name="check" [size]="16" [strokeWidth]="3"></lucide-icon>
+        </div>
+        
+        <!-- Current Step -->
+        <div *ngIf="step.status === 'current'" class="w-8 h-8 rounded-full border-4 border-indigo-200 dark:border-[#00E4D0]/30 flex items-center justify-center shadow-[0_0_15px_-3px_rgba(0,228,208,0.5)] bg-white dark:bg-slate-900">
+          <div class="w-4 h-4 rounded-full bg-[#00E4D0]"></div>
+        </div>
+        
+        <!-- Upcoming Step -->
+        <div *ngIf="step.status === 'upcoming'" class="w-8 h-8 rounded-full border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center bg-slate-50 dark:bg-slate-800 text-slate-500">
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="flex flex-col">
+        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">Step {{step.id}}</span>
+        <span class="text-sm font-semibold" 
+              [ngClass]="step.status === 'upcoming' ? 'text-slate-500' : 'text-slate-900 dark:text-slate-200'">
+          {{step.label}}
+        </span>
+      </div>
+    </div>
+    
+  </ng-container>
+</div>

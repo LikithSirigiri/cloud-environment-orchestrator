@@ -1,0 +1,20 @@
+<div class="popup">
+  <button type="button" class="popup-trigger" [class.popup-trigger--open]="isOpen" (click)="toggle()">
+    <span class="popup-trigger__label">{{ selectedLabel }}</span>
+    <span class="burger" [class.burger--open]="isOpen">
+      <span></span>
+      <span></span>
+      <span></span>
+    </span>
+  </button>
+
+  <nav class="popup-window" [class.popup-window--open]="isOpen">
+    <ul>
+      <li *ngFor="let opt of options">
+        <button type="button" [class.popup-window__item--active]="opt.value === value" (click)="select(opt)">
+          {{ opt.label }}
+        </button>
+      </li>
+    </ul>
+  </nav>
+</div>

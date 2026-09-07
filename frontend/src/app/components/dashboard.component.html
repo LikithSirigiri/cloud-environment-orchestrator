@@ -1,0 +1,47 @@
+<div class="flex flex-col h-screen bg-slate-50 dark:bg-[#07051a] overflow-hidden font-sans text-slate-900 dark:text-slate-100">
+  <app-header></app-header>
+  <main class="flex-1 overflow-y-auto pb-8 scroll-smooth">
+    <div class="max-w-[1200px] mx-auto px-6 py-6">
+
+      <!-- Back / Switch Provider Button -->
+      <div *ngIf="selectedProvider" class="mb-4 flex justify-between items-center animate-fade-in">
+        <button type="button" (click)="onBack()"
+                class="flex items-center text-xs font-medium text-[#00E4D0] hover:text-[#00c2b1] transition-colors bg-indigo-100 dark:bg-[#00E4D0]/10 px-3 py-1.5 rounded-lg border border-[#00E4D0]/20">
+          <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+          {{ selectedMode ? 'Change Mode' : 'Switch Cloud Provider' }}
+        </button>
+      </div>
+
+      <div class="w-full">
+        <!-- Horizontal Stepper Card (DR wizard steps only) -->
+        <div *ngIf="selectedMode === 'dr'" class="bg-white dark:bg-slate-900/60 rounded-[24px] p-6 mb-6 shadow-xl border border-slate-100 dark:border-slate-800 flex flex-col animate-fade-in">
+           <h3 class="text-xs font-bold text-[#00E4D0] mb-6 uppercase tracking-wider">Setup Progress</h3>
+           <div class="w-full">
+             <app-stepper class="block w-full"></app-stepper>
+           </div>
+        </div>
+
+        <div *ngIf="!selectedProvider" class="animate-fade-in">
+          <app-provider-selection (providerSelected)="onProviderSelected($event)"></app-provider-selection>
+        </div>
+        <div *ngIf="selectedProvider && !selectedMode" class="animate-fade-in">
+          <app-mode-selection [provider]="selectedProvider" (modeSelected)="onModeSelected($event)"></app-mode-selection>
+        </div>
+        <div *ngIf="selectedProvider === 'azure' && selectedMode === 'dr'" class="animate-fade-in">
+          <app-azure-dr-form></app-azure-dr-form>
+        </div>
+        <div *ngIf="selectedProvider === 'aws' && selectedMode === 'dr'" class="animate-fade-in">
+          <app-aws-dr-form></app-aws-dr-form>
+        </div>
+        <div *ngIf="selectedProvider === 'azure' && selectedMode === 'new'" class="animate-fade-in">
+          <app-new-environment-form [provider]="selectedProvider"></app-new-environment-form>
+        </div>
+        <div *ngIf="selectedProvider === 'aws' && selectedMode === 'new'" class="animate-fade-in">
+          <app-aws-new-environment-form [provider]="selectedProvider"></app-aws-new-environment-form>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

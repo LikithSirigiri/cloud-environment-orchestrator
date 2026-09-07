@@ -1,0 +1,231 @@
+<section class="relative max-w-[880px] mx-auto mb-6 px-4">
+  <div class="text-center mb-4">
+    <div class="pill-badge">
+      <span class="w-1.5 h-1.5 rounded-full bg-[#00E4D0] animate-pulse-dot"></span>
+      Step 3 of 3 &middot; New Environment &middot; {{ stage === 'infra' ? 'Stage 1: Infrastructure' : 'Stage 2: Application Setup' }}
+    </div>
+    <h2 class="shimmer-heading text-2xl font-extrabold mb-1.5 tracking-tight">
+      New Environment{{ providerLabel ? ' on ' + providerLabel : '' }}
+    </h2>
+    <p class="text-slate-500 dark:text-slate-400 text-sm">
+      <ng-container *ngIf="stage === 'infra'">Provisions RGs, VNet/subnets/NSG, storage, and 5 VMs. Application setup is a separate step, once this is done.</ng-container>
+      <ng-container *ngIf="stage === 'app'">Sets up MySQL/Keycloak/RabbitMQ/Redis/Mongo, web portals, and microservices on the infrastructure already provisioned for <strong>{{ formData.client_name }}</strong>.</ng-container>
+    </p>
+    <button *ngIf="stage === 'app'" type="button" class="new-env-reveal mt-2" style="position: static; transform: none;" (click)="backToInfraStage()">
+      &larr; Start a different deployment
+    </button>
+  </div>
+
+  <!-- Active deployments: destroy, or pick up Stage 2, without retyping a client name from memory -->
+  <div *ngIf="activeDeployments.length" class="new-env-card mb-4">
+    <h3 class="new-env-section-title">New Environment Deployments</h3>
+    <div class="new-env-deployment-list">
+      <div *ngFor="let d of activeDeployments" class="new-env-deployment-row">
+        <div class="new-env-deployment-info">
+          <span class="new-env-deployment-client">{{ d.clientName }} &middot; {{ d.env || 'legacy (no env)' }}</span>
+          <span class="new-env-status-pill"
+                [class.new-env-status-pill--busy]="d.status === 'provisioning' || d.status === 'destroying'"
+                [class.new-env-status-pill--failed]="d.status === 'failed'">
+            {{ d.status }}
+          </span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button
+            *ngIf="d.status === 'infra_ready'"
+            type="button"
+            class="new-env-submit new-env-submit--sm"
+            [disabled]="isDeploying"
+            (click)="setupApplication(d)">
+            Setup Application
+          </button>
+          <button
+            type="button"
+            class="new-env-destroy new-env-destroy--sm"
+            [disabled]="isDeploying || d.status === 'destroying' || d.status === 'provisioning'"
+            (click)="destroyDeployment(d)">
+            Destroy
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Azure Authentication -->
+  <div class="new-env-card mb-4">
+    <h3 class="new-env-section-title">Azure Authentication</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div>
+        <label class="new-env-label">Subscription ID</label>
+        <input type="text" spellcheck="false" class="new-env-input" [(ngModel)]="azureCredentials.subscriptionId" />
+      </div>
+      <div>
+        <label class="new-env-label">Tenant ID</label>
+        <input type="text" spellcheck="false" class="new-env-input" [(ngModel)]="azureCredentials.tenantId" />
+      </div>
+      <div>
+        <label class="new-env-label">Client ID</label>
+        <input type="text" spellcheck="false" class="new-env-input" [(ngModel)]="azureCredentials.clientId" />
+      </div>
+      <div>
+        <label class="new-env-label">Client Secret</label>
+        <input type="password" spellcheck="false" class="new-env-input" [(ngModel)]="azureCredentials.clientSecret" />
+      </div>
+    </div>
+    <p class="new-env-hint mt-2" *ngIf="stage === 'app'">
+      Stage 2 normally reuses the credentials Stage 1 was created with automatically — these only matter as a fallback.
+    </p>
+  </div>
+
+  <!-- Stage 1 fields: infrastructure -->
+  <ng-container *ngIf="stage === 'infra'">
+    <div class="new-env-card mb-4">
+      <h3 class="new-env-section-title">Environment Details</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label class="new-env-label" for="ne-client">Client Name</label>
+          <input id="ne-client" type="text" class="new-env-input" [(ngModel)]="formData.client_name" placeholder="e.g. acme" />
+        </div>
+        <div>
+          <label class="new-env-label" for="ne-env">Environment</label>
+          <select id="ne-env" class="new-env-input" [(ngModel)]="formData.env">
+            <option value="" disabled>Select environment</option>
+            <option value="UAT">UAT</option>
+            <option value="PROD">PROD</option>
+          </select>
+          <p class="new-env-hint">A client can have a separate UAT and PROD deployment at once &mdash; each fully independent (own infra, own state).</p>
+        </div>
+        <div>
+          <label class="new-env-label" for="ne-location">Location</label>
+          <input id="ne-location" type="text" class="new-env-input" [(ngModel)]="formData.location" placeholder="e.g. East US" />
+        </div>
+      </div>
+    </div>
+
+    <div class="new-env-card mb-4">
+      <h3 class="new-env-section-title">VM Admin Credentials</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label class="new-env-label" for="ne-admin-user">Admin Username</label>
+          <input id="ne-admin-user" type="text" spellcheck="false" class="new-env-input" [(ngModel)]="formData.admin_username" />
+          <p class="new-env-hint">Azure rejects reserved names like admin/root/administrator/guest/test/user.</p>
+        </div>
+        <div>
+          <label class="new-env-label" for="ne-admin-pass">Admin Password</label>
+          <div class="relative">
+            <input id="ne-admin-pass" [type]="showAdminPassword ? 'text' : 'password'" spellcheck="false" class="new-env-input pr-16" [(ngModel)]="formData.admin_password" />
+            <button type="button" class="new-env-reveal" (click)="showAdminPassword = !showAdminPassword">
+              {{ showAdminPassword ? 'Hide' : 'Show' }}
+            </button>
+          </div>
+          <p class="new-env-hint">12-123 characters, at least 3 of: lowercase, uppercase, digit, special character.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="new-env-card mb-4">
+      <h3 class="new-env-section-title">Access Control</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label class="new-env-label" for="ne-ssh-ips">SSH Allowed IPs</label>
+          <input id="ne-ssh-ips" type="text" class="new-env-input" [(ngModel)]="formData.ssh_allowed_ips" placeholder="comma-separated, e.g. 1.2.3.4,5.6.7.8" />
+        </div>
+        <div>
+          <label class="new-env-label" for="ne-https-ips">HTTPS Allowed IPs</label>
+          <input id="ne-https-ips" type="text" class="new-env-input" [(ngModel)]="formData.https_allowed_ips" placeholder="comma-separated, e.g. 0.0.0.0/0" />
+        </div>
+      </div>
+    </div>
+
+    <div class="new-env-card mb-4">
+      <h3 class="new-env-section-title">Networking (optional)</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label class="new-env-label" for="ne-vnet-cidr">VNet CIDR</label>
+          <input id="ne-vnet-cidr" type="text" class="new-env-input" [(ngModel)]="formData.vnet_address_space" placeholder="default 10.0.0.0/16" />
+        </div>
+        <div>
+          <label class="new-env-label" for="ne-app-cidr">App Subnet CIDR</label>
+          <input id="ne-app-cidr" type="text" class="new-env-input" [(ngModel)]="formData.app_subnet_prefix" placeholder="default 10.0.1.0/24" />
+        </div>
+        <div>
+          <label class="new-env-label" for="ne-web-cidr">Web Subnet CIDR</label>
+          <input id="ne-web-cidr" type="text" class="new-env-input" [(ngModel)]="formData.web_subnet_prefix" placeholder="default 10.0.2.0/24" />
+        </div>
+        <div>
+          <label class="new-env-label" for="ne-db-cidr">DB Subnet CIDR</label>
+          <input id="ne-db-cidr" type="text" class="new-env-input" [(ngModel)]="formData.db_subnet_prefix" placeholder="default 10.0.3.0/24" />
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Stage 2 fields: application setup -->
+  <ng-container *ngIf="stage === 'app'">
+    <div class="new-env-card mb-4">
+      <h3 class="new-env-section-title">Environment Details</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label class="new-env-label" for="ne-client-app">Client Name</label>
+          <input id="ne-client-app" type="text" class="new-env-input" [(ngModel)]="formData.client_name" placeholder="e.g. acme" readonly />
+          <p class="new-env-hint">Must match the client an infrastructure Stage was already provisioned for.</p>
+        </div>
+        <div>
+          <label class="new-env-label" for="ne-env-app">Environment</label>
+          <input id="ne-env-app" type="text" class="new-env-input" [ngModel]="formData.env" readonly />
+          <p class="new-env-hint">Fixed from Stage 1 &mdash; finds the "{{ formData.client_name || 'client' }}-{{ (formData.env || 'env') | lowercase }}" build container.</p>
+        </div>
+        <div>
+          <label class="new-env-label" for="ne-domain">Domain</label>
+          <input id="ne-domain" type="text" class="new-env-input" [(ngModel)]="formData.domain" placeholder="e.g. acme.example.com" />
+        </div>
+        <div>
+          <label class="new-env-label" for="ne-kong-domain">Kong Domain</label>
+          <input id="ne-kong-domain" type="text" class="new-env-input" [(ngModel)]="formData.kong_domain" placeholder="e.g. kong.acme.example.com" />
+        </div>
+      </div>
+    </div>
+
+    <div class="new-env-card mb-4">
+      <h3 class="new-env-section-title">Release Manifest</h3>
+      <p class="new-env-hint mb-2">
+        Upload the release JSON (e.g. 5.1.2026.08.15.000.json) — its "versions" object supplies the exact build to fetch for each web portal.
+      </p>
+      <input type="file" accept="application/json,.json" class="new-env-input" (change)="onManifestFileSelected($event)" />
+      <p *ngIf="manifestFileName" class="new-env-hint mt-2">
+        Loaded: <strong>{{ manifestFileName }}</strong>
+        <button type="button" class="new-env-reveal ml-2" style="position: static; transform: none;" (click)="clearManifest()">Clear</button>
+      </p>
+      <p *ngIf="manifestError" class="new-env-hint mt-2" style="color: #dc2626;">{{ manifestError }}</p>
+    </div>
+  </ng-container>
+
+  <!-- Generated internal service credentials — shown once, right after Stage 1 apply starts -->
+  <div *ngIf="generatedSecrets" class="new-env-card new-env-card--ack mb-4">
+    <h3 class="new-env-section-title">Generated Internal Credentials</h3>
+    <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">
+      These were generated for this deployment and are shown only once — record them now.
+    </p>
+    <div class="new-env-secrets-grid">
+      <ng-container *ngFor="let entry of generatedSecrets | keyvalue">
+        <span class="new-env-secret-key">{{ entry.key }}</span>
+        <code class="new-env-secret-value">{{ entry.value }}</code>
+      </ng-container>
+    </div>
+  </div>
+
+  <!-- Deploy / Destroy -->
+  <div class="flex items-center gap-3 mb-4">
+    <button type="button" class="new-env-submit" [disabled]="isDeploying" (click)="startDeployment('apply')">
+      {{ isDeploying ? 'Working...' : (stage === 'infra' ? 'Provision Infrastructure' : 'Setup Application') }}
+    </button>
+    <button type="button" class="new-env-destroy" [disabled]="isDeploying" (click)="startDeployment('destroy')">
+      Destroy
+    </button>
+  </div>
+
+  <!-- Log viewer -->
+  <div *ngIf="deploymentLogs.length" class="new-env-card">
+    <h3 class="new-env-section-title">Deployment Log</h3>
+    <pre class="new-env-log">{{ deploymentLogs.join('\n') }}</pre>
+  </div>
+</section>

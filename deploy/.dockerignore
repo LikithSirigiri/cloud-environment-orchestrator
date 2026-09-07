@@ -1,0 +1,19 @@
+node_modules
+frontend/node_modules
+frontend/dist
+backend/node_modules
+backend/data.db
+backend/deployments.db
+backend/logs
+runs
+data
+.env
+.git
+# Bare ".terraform" only matched a top-level .terraform/ -- azure-new-env/.terraform
+# and aws-new-env/.terraform (each holding downloaded provider plugin binaries,
+# hundreds of MB) were slipping through into the build context and the image
+# itself. "**/" makes these match at any depth, not just the root.
+**/.terraform
+**/*.tfstate
+**/*.tfstate.backup
+**/terraform.tfvars.json

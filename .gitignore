@@ -1,0 +1,32 @@
+# Terraform
+**/.terraform/
+**/.terraform.lock.hcl
+**/terraform.tfstate
+**/terraform.tfstate.backup
+**/tfplan
+**/terraform.tfvars.json
+**/terraform.tfvars.bak
+
+# Node
+**/node_modules/
+
+# Backend runtime data / logs
+backend/logs/
+backend/*.db
+backend/deployments.db
+backend/data.db
+**/runs/
+
+# Build output
+frontend/dist/
+frontend/.angular/
+
+# Env / secrets
+.env
+**/.env
+
+# Misc
+gitlab-repo/
+backup_tf/
+data/
+*.log

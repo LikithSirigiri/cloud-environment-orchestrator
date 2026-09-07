@@ -1,0 +1,149 @@
+<div class="bg-white dark:bg-slate-900/60 rounded-[24px] shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)] border border-slate-100 dark:border-slate-800 overflow-hidden">
+  <div class="border-b border-slate-100 dark:border-slate-800 px-8 py-6 bg-slate-50/50 dark:bg-slate-800/50 flex justify-between items-center">
+    <div>
+      <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">AWS Disaster Recovery Config</h2>
+      <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Configure your AWS DR environment parameters using the terra-dr-activity module.</p>
+    </div>
+  </div>
+
+  <div class="p-8">
+    <form (ngSubmit)="startDeployment('apply')" #drForm="ngForm">
+      
+      <!-- General Settings -->
+      <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 uppercase tracking-wider">General Configuration</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mb-8">
+        <div class="form-group">
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Client Name *</label>
+          <input type="text" [(ngModel)]="formData.client_name" name="client_name" required placeholder="e.g. CLIX, JFS"
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all outline-none text-sm placeholder:text-slate-500 dark:text-slate-400">
+          <p class="text-xs text-slate-400 mt-1">Identifies this client's DR state so multiple clients can run concurrently.</p>
+        </div>
+        <div class="form-group">
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">DC Region (Source) *</label>
+          <input type="text" [(ngModel)]="formData.dc_region" name="dc_region" required
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all outline-none text-sm placeholder:text-slate-500 dark:text-slate-400">
+        </div>
+        <div class="form-group">
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">DR Region (Target) *</label>
+          <input type="text" [(ngModel)]="formData.dr_region" name="dr_region" required
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all outline-none text-sm placeholder:text-slate-500 dark:text-slate-400">
+        </div>
+        <div class="form-group">
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Local PEM Filename *</label>
+          <input type="text" [(ngModel)]="formData.local_pem_filename" name="local_pem_filename" required
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all outline-none text-sm placeholder:text-slate-500 dark:text-slate-400">
+        </div>
+        <div class="form-group">
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">SSH Username *</label>
+          <input type="text" [(ngModel)]="formData.ssh_username" name="ssh_username" required
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all outline-none text-sm placeholder:text-slate-500 dark:text-slate-400">
+        </div>
+      </div>
+
+      <!-- Networking -->
+      <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 uppercase tracking-wider">Networking</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mb-8">
+        <div class="form-group">
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">DR VPC Name *</label>
+          <input type="text" [(ngModel)]="formData.dr_vpc_name" name="dr_vpc_name" required
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all outline-none text-sm placeholder:text-slate-500 dark:text-slate-400">
+        </div>
+        <div class="form-group">
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">DR VPC CIDR *</label>
+          <input type="text" [(ngModel)]="formData.dr_vpc_cidr" name="dr_vpc_cidr" required
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all outline-none text-sm placeholder:text-slate-500 dark:text-slate-400">
+        </div>
+        <div class="form-group">
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">DR Public Subnet CIDR *</label>
+          <input type="text" [(ngModel)]="formData.dr_public_subnet_cidr" name="dr_public_subnet_cidr" required
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all outline-none text-sm placeholder:text-slate-500 dark:text-slate-400">
+        </div>
+        <div class="form-group">
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">DR Private Subnet CIDR *</label>
+          <input type="text" [(ngModel)]="formData.dr_private_subnet_cidr" name="dr_private_subnet_cidr" required
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all outline-none text-sm placeholder:text-slate-500 dark:text-slate-400">
+        </div>
+        <div class="form-group">
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">DR Availability Zone *</label>
+          <input type="text" [(ngModel)]="formData.dr_availability_zone" name="dr_availability_zone" required
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all outline-none text-sm placeholder:text-slate-500 dark:text-slate-400">
+        </div>
+        <div class="form-group">
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">DR AZ Count *</label>
+          <input type="number" [(ngModel)]="formData.dr_az_count" name="dr_az_count" required
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all outline-none text-sm placeholder:text-slate-500 dark:text-slate-400">
+        </div>
+      </div>
+
+      <!-- Database -->
+      <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 uppercase tracking-wider">Database Settings</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mb-8">
+        <div class="form-group">
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">MongoDB Version *</label>
+          <input type="text" [(ngModel)]="formData.mongodb_version" name="mongodb_version" required
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all outline-none text-sm placeholder:text-slate-500 dark:text-slate-400">
+        </div>
+        <div class="form-group">
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">DB Server Count *</label>
+          <input type="number" [(ngModel)]="formData.db_server_count" name="db_server_count" required
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all outline-none text-sm placeholder:text-slate-500 dark:text-slate-400">
+        </div>
+      </div>
+
+      <!-- Server Mappings -->
+      <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 uppercase tracking-wider">Server Role Mappings</h3>
+      <div class="mb-8">
+        <div class="form-group mb-4 w-1/3">
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Number of App Servers</label>
+          <input type="number" [(ngModel)]="serverCount" name="serverCount" (change)="onServerCountChange()" min="0"
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all outline-none text-sm placeholder:text-slate-500 dark:text-slate-400">
+        </div>
+
+        <div *ngIf="serverConfigs.length > 0" class="space-y-4">
+          <div *ngFor="let srv of serverConfigs; let i = index" class="p-5 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-800 rounded-xl flex flex-col md:flex-row gap-4 items-end transition-all hover:border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100">
+            <div class="flex-1 w-full">
+              <label class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">Role Key</label>
+              <input type="text" [(ngModel)]="srv.role" [name]="'role_'+i" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none">
+            </div>
+            <div class="flex-1 w-full">
+              <label class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">DC Tag</label>
+              <input type="text" [(ngModel)]="srv.dc_tag" [name]="'dc_tag_'+i" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none">
+            </div>
+            <div class="flex-1 w-full">
+              <label class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">DC Private IP</label>
+              <input type="text" [(ngModel)]="srv.dc_ip" [name]="'dc_ip_'+i" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none">
+            </div>
+            <div class="flex-1 w-full">
+              <label class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">DR Instance Type</label>
+              <input type="text" [(ngModel)]="srv.dr_instance_type" [name]="'dr_instance_'+i" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none">
+            </div>
+            <button type="button" (click)="removeServer(i)" class="p-2 text-slate-500 dark:text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+              <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 flex justify-end space-x-4">
+        <button type="button" (click)="startDeployment('destroy')" [disabled]="isDeploying"
+          class="px-6 py-2.5 bg-red-50 text-red-600 text-sm font-medium rounded-xl hover:bg-red-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+          Destroy
+        </button>
+        <button type="submit" [disabled]="!drForm.form.valid || isDeploying"
+          class="px-6 py-2.5 bg-orange-500 text-white text-sm font-medium rounded-xl hover:bg-orange-600 focus:ring-4 focus:ring-orange-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+          {{ isDeploying ? 'Deploying...' : 'Deploy to AWS' }}
+        </button>
+      </div>
+    </form>
+
+    <!-- Logs -->
+    <div *ngIf="deploymentLogs.length > 0" class="mt-8 bg-white dark:bg-slate-900 rounded-xl p-4 shadow-inner border border-slate-100 dark:border-slate-800">
+      <h4 class="text-xs font-mono text-slate-500 dark:text-slate-400 mb-3 uppercase tracking-wider">Deployment Logs</h4>
+      <div class="font-mono text-sm space-y-1 max-h-[300px] overflow-y-auto">
+        <div *ngFor="let log of deploymentLogs" class="text-green-400 whitespace-pre-wrap">
+          {{ log }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

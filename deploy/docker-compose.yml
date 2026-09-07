@@ -1,0 +1,67 @@
+services:
+  app:
+    # Overwritten by the Jenkinsfile's Deploy stage (sed) on each pipeline run --
+    # this default is just what's used the first time you bring it up manually.
+    image: terra:1
+    restart: unless-stopped
+    # Only reachable from the host itself, not the VM's public interface --
+    # the reverse proxy in front of this host (already configured with a
+    # real cert for the public hostname, proxy_pass http://127.0.0.1:3010)
+    # is what the browser actually reaches over HTTPS.
+    ports:
+      - "127.0.0.1:3010:3000"
+    env_file:
+      - .env
+    # The image's `node` user (uid/gid 1000, baked in by the official node:22
+    # base) owns /app -- the host-side ./data paths below must be chown'd to
+    # 1000:1000 too, or the container will fail to write its DBs/logs/runs.
+    volumes:
+      # Persistent state -- must survive container restarts/redeploys.
+      # Left-hand (host) paths are relative to this compose file; adjust the
+      # right-hand (container) paths if your image's WORKDIR isn't /app.
+      - ./data/deployments.db:/app/backend/deployments.db
+      - ./data/data.db:/app/backend/data.db
+      - ./data/logs:/app/backend/logs
+      - ./data/runs:/app/runs
+    # Hard ceiling + a soft reservation the scheduler can count on. Terraform
+    # runs (especially `plan`/`apply` across many VMs) are the spiky part --
+    # sized generously so a deploy doesn't get OOM-killed mid-run.
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2g
+          # PID cap guards against a runaway/orphaned terraform provider
+          # process tree. Set only here, not also as the top-level
+          # `pids_limit` -- some Compose versions apply deploy.resources
+          # outside Swarm too and error out ("can't set distinct values on
+          # 'pids_limit' and 'deploy.resources.limits.pids'") if both are
+          # present.
+          pids: 512
+        reservations:
+          cpus: "0.5"
+          memory: 512m
+    # nofile is raised because Socket.IO + many concurrent terraform child
+    # processes can otherwise exhaust the container's default fd limit.
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:3000/healthz"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        # Container stdout/stderr only (process-level logs, socket.io/express
+        # startup messages) -- the full terraform output per job already goes
+        # to ./data/logs on its own, unbounded rotation there is a separate
+        # concern. This just stops the docker-managed json-file log from
+        # growing unbounded on the host.
+        max-size: "10m"
+        max-file: "5"

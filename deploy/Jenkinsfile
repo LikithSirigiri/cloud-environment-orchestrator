@@ -1,0 +1,86 @@
+// Builds the single combined image (API + built UI, see Dockerfile) and
+// pushes it to the registry. Deployment to the server is a separate step
+// (see the "Deploy" stage below) -- adjust DEPLOY_HOST/credential IDs to
+// match your actual server and Jenkins credential store before relying on
+// this stage; it's stubbed as an SSH command against the docker-compose.yml
+// already committed in this repo.
+
+pipeline {
+    agent any
+
+    environment {
+        REGISTRY    = '<your-registry>'
+        IMAGE_PATH  = 'deployment-dashboard/teraform-dr'
+        // Fill in for your actual target server before relying on the Deploy stage.
+        DEPLOY_USER = 'ubuntu'
+        DEPLOY_HOST = 'CHANGE-ME.example.com'
+        DEPLOY_PATH = '/opt/terra-dr-activity'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+                script {
+                    // This is a plain Pipeline job (GitLab Connection field, not
+                    // Multibranch), so env.BRANCH_NAME is never set here. Fall
+                    // back through whatever the checkout/GitLab webhook actually
+                    // populated, stripping a leading "origin/" if present.
+                    def branch = env.BRANCH_NAME ?: env.GIT_BRANCH ?: env.gitlabBranch ?: 'unknown'
+                    env.BRANCH = branch.replaceFirst('^origin/', '')
+                    env.FULL_IMAGE = "${REGISTRY}/${IMAGE_PATH}:${env.BRANCH}"
+                    echo "Building ${env.FULL_IMAGE}"
+                }
+            }
+        }
+
+        stage('Build image') {
+            steps {
+                sh "docker build -t ${env.FULL_IMAGE} ."
+            }
+        }
+
+        stage('Push image') {
+            steps {
+                // A Jenkins "Username with password" credential pointing at
+                // your container registry.
+                withCredentials([usernamePassword(
+                    credentialsId: 'container-registry-creds',
+                    usernameVariable: 'REG_USER',
+                    passwordVariable: 'REG_PASS'
+                )]) {
+                    sh """
+                        echo "\$REG_PASS" | docker login ${REGISTRY} -u "\$REG_USER" --password-stdin
+                        docker push ${env.FULL_IMAGE}
+                    """
+                }
+            }
+        }
+
+        stage('Deploy') {
+            when { expression { env.BRANCH == 'terraform-dr' } }
+            steps {
+                // Requires a Jenkins SSH credential ('dr-server-ssh') with access
+                // to the target server, which must already have docker-compose.yml,
+                // .env, and the pre-created data/ volume dirs from this repo (see
+                // the deployment procedure) in DEPLOY_PATH.
+                sshagent(credentials: ['dr-server-ssh']) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} '
+                            cd ${DEPLOY_PATH} &&
+                            sed -i "s#image:.*#image: ${env.FULL_IMAGE}#" docker-compose.yml &&
+                            docker compose pull &&
+                            docker compose up -d
+                        '
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            sh "docker logout ${REGISTRY} || true"
+        }
+    }
+}

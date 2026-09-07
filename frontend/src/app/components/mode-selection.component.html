@@ -1,0 +1,47 @@
+<section class="relative max-w-[880px] lg:max-w-[1100px] xl:max-w-[1320px] mx-auto mb-6 px-4 lg:px-8">
+  <div class="text-center mb-4">
+    <div class="pill-badge animate-fade-in-up" style="animation-delay: 0ms">
+      <span class="w-1.5 h-1.5 rounded-full bg-[#00E4D0] animate-pulse-dot"></span>
+      Step 2 of 3 &middot; Environment Setup
+    </div>
+    <h2 class="shimmer-heading text-2xl font-extrabold mb-1.5 tracking-tight animate-fade-in-up" style="animation-delay: 90ms">
+      What are you setting up?
+    </h2>
+    <p class="text-slate-500 dark:text-slate-400 text-sm animate-fade-in-up" style="animation-delay: 180ms">
+      Choose what you'd like to do{{ providerLabel ? ' on ' + providerLabel : '' }}.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <!-- DR Card -->
+    <button
+      type="button"
+      (click)="selectMode('dr')"
+      class="mode-card mode-card--dr animate-fade-in-up"
+      style="animation-delay: 240ms">
+      <span class="mode-card__icon-wrap">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M12 3L4 6.5V11c0 5 3.4 8.9 8 10 4.6-1.1 8-5 8-10V6.5L12 3Z" stroke="#0d9488" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M8.5 12.2l2.4 2.4 4.6-4.9" stroke="#0d9488" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <h3 class="mode-card__title">Disaster Recovery</h3>
+      <p class="mode-card__desc">Deploy or manage this client's DR environment</p>
+    </button>
+
+    <!-- New Environment Card -->
+    <button
+      type="button"
+      (click)="selectMode('new')"
+      class="mode-card mode-card--new animate-fade-in-up"
+      style="animation-delay: 320ms">
+      <span class="mode-card__icon-wrap">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M12 5v14M5 12h14" stroke="#ea580c" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <h3 class="mode-card__title">New Environment</h3>
+      <p class="mode-card__desc">Provision a brand-new infrastructure environment</p>
+    </button>
+  </div>
+</section>

@@ -1,0 +1,106 @@
+.admin-alert {
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #dc2626;
+  font-size: 0.875rem;
+}
+:host-context(.dark) .admin-alert {
+  color: #f87171;
+}
+
+.admin-table-card {
+  border-radius: 1.25rem;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+:host-context(.dark) .admin-table-card {
+  background: rgba(15, 23, 42, 0.6);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table thead th {
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  padding: 0.875rem 1.5rem;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+:host-context(.dark) .admin-table thead th {
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.admin-table tbody td {
+  padding: 0.875rem 1.5rem;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.04);
+}
+:host-context(.dark) .admin-table tbody td {
+  border-color: rgba(255, 255, 255, 0.04);
+}
+
+.admin-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-table tbody tr {
+  transition: background 0.2s ease;
+}
+.admin-table tbody tr:hover {
+  background: rgba(0, 228, 208, 0.04);
+}
+
+.admin-avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+  background: linear-gradient(135deg, #e0e7ff, #eef2ff);
+  color: #4338ca;
+  flex-shrink: 0;
+}
+:host-context(.dark) .admin-avatar {
+  background: linear-gradient(135deg, rgba(0, 228, 208, 0.2), rgba(0, 228, 208, 0.05));
+  color: #00e4d0;
+}
+
+.admin-role-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.625rem;
+  border-radius: 9999px;
+  background: rgba(99, 102, 241, 0.1);
+  color: #4f46e5;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+:host-context(.dark) .admin-role-pill {
+  background: rgba(129, 140, 248, 0.15);
+  color: #a5b4fc;
+}
+
+.admin-checkbox {
+  width: 1.125rem;
+  height: 1.125rem;
+  accent-color: #00b8a8;
+  cursor: pointer;
+}
+.admin-checkbox:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

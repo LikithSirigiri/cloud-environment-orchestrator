@@ -1,0 +1,511 @@
+.pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 1rem;
+  border-radius: 9999px;
+  background: rgba(0, 228, 208, 0.1);
+  border: 1px solid rgba(0, 228, 208, 0.3);
+  color: #00a89a;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1.25rem;
+}
+:host-context(.dark) .pill-badge {
+  color: #00e4d0;
+}
+
+.shimmer-heading {
+  display: block;
+  background: linear-gradient(90deg, #0f172a 0%, #334155 25%, #00b8a8 50%, #334155 75%, #0f172a 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 6s linear infinite;
+}
+:host-context(.dark) .shimmer-heading {
+  background: linear-gradient(90deg, #f1f5f9 0%, #94a3b8 25%, #00e4d0 50%, #94a3b8 75%, #f1f5f9 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@keyframes shimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+.provider-card {
+  position: relative;
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 2px;
+  border-radius: 1.5rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  appearance: none;
+}
+.provider-card:focus-visible {
+  outline: 2px solid #00e4d0;
+  outline-offset: 4px;
+}
+
+.provider-card__glow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  filter: blur(8px);
+  transition: opacity 0.4s ease;
+  animation: spin 6s linear infinite;
+}
+.provider-card--azure .provider-card__glow {
+  background: conic-gradient(from 0deg, #0089d6, #38bdf8, #6366f1, #0089d6);
+}
+.provider-card--aws .provider-card__glow {
+  background: conic-gradient(from 0deg, #f90, #ffb84d, #f97316, #f90);
+}
+.provider-card:hover .provider-card__glow,
+.provider-card:focus-visible .provider-card__glow {
+  opacity: 1;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.provider-card__inner {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  padding: 2rem;
+  border-radius: calc(1.5rem - 2px);
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+}
+:host-context(.dark) .provider-card__inner {
+  background: rgba(15, 23, 42, 0.65);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+.provider-card:hover .provider-card__inner {
+  transform: translateY(-8px);
+  box-shadow: 0 24px 48px -18px rgba(15, 23, 42, 0.25);
+}
+
+.provider-card__icon-wrap {
+  width: 8rem;
+  height: 6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  animation: bob 2.6s ease-in-out infinite;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.provider-card:hover .provider-card__icon-wrap {
+  animation-play-state: paused;
+  transform: scale(1.12) rotate(-3deg);
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.provider-card__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #00b8a8;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+:host-context(.dark) .provider-card__cta {
+  color: #00e4d0;
+}
+.provider-card:hover .provider-card__cta,
+.provider-card:focus-visible .provider-card__cta {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.provider-card__arrow {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 0.3s ease;
+}
+.provider-card:hover .provider-card__arrow {
+  transform: translateX(4px);
+}
+
+.pending-access {
+  max-width: 52rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+  padding: 2rem 2.5rem;
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  backdrop-filter: blur(12px);
+}
+:host-context(.dark) .pending-access {
+  background: rgba(15, 23, 42, 0.5);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+@media (min-width: 1024px) {
+  .pending-access {
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    gap: 2.5rem;
+    padding: 2.5rem 3.5rem;
+  }
+}
+
+.pending-access__copy {
+  max-width: 26rem;
+}
+
+.pending-access__hints {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pending-access__hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: #64748b;
+}
+:host-context(.dark) .pending-access__hint {
+  color: #94a3b8;
+}
+
+.pending-access__hint-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+
+/* 3D pending-access scene: perspective + mouse-tilt stage, floating lock, orbiting provider chips */
+
+.pending-3d {
+  position: relative;
+  width: 260px;
+  height: 220px;
+  perspective: 1400px;
+}
+
+.pending-3d__blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(28px);
+  opacity: 0.35;
+  pointer-events: none;
+}
+.pending-3d__blob--a {
+  width: 9rem;
+  height: 9rem;
+  top: 0.5rem;
+  left: 20%;
+  background: #f59e0b;
+  animation: float 9s ease-in-out infinite;
+}
+.pending-3d__blob--b {
+  width: 8rem;
+  height: 8rem;
+  bottom: 0;
+  right: 20%;
+  background: #6366f1;
+  animation: float 13s ease-in-out infinite;
+}
+
+.pending-3d__stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--mx, 0deg)) rotateY(var(--my, 0deg));
+  transition: transform 0.25s ease-out;
+}
+
+.pending-3d__ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4.5rem;
+  height: 4.5rem;
+  margin: -2.25rem 0 0 -2.25rem;
+  border-radius: 9999px;
+  border: 1.5px solid rgba(217, 119, 6, 0.4);
+  animation: pendingRing 3s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+}
+.pending-3d__ring--delay {
+  animation-delay: 1.5s;
+}
+@keyframes pendingRing {
+  0% { transform: scale(0.6); opacity: 0.8; }
+  100% { transform: scale(2.1); opacity: 0; }
+}
+
+.pending-3d__lock {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4.5rem;
+  height: 4.5rem;
+  margin: -2.25rem 0 0 -2.25rem;
+  transform-style: preserve-3d;
+  animation: pendingLockFloat 4.5s ease-in-out infinite;
+}
+@keyframes pendingLockFloat {
+  0%, 100% { transform: translateY(0) rotateY(-14deg) rotateX(4deg); }
+  50% { transform: translateY(-10px) rotateY(14deg) rotateX(-2deg); }
+}
+
+.pending-3d__lock-shackle {
+  position: absolute;
+  top: -0.6rem;
+  left: 50%;
+  width: 2.1rem;
+  height: 1.6rem;
+  margin-left: -1.05rem;
+  border: 0.45rem solid #d97706;
+  border-bottom: none;
+  border-radius: 1.5rem 1.5rem 0 0;
+  opacity: 0.85;
+}
+:host-context(.dark) .pending-3d__lock-shackle {
+  border-color: #fbbf24;
+}
+
+.pending-3d__lock-body {
+  position: relative;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d97706;
+  background: linear-gradient(145deg, rgba(245, 158, 11, 0.22), rgba(245, 158, 11, 0.08));
+  border: 1px solid rgba(217, 119, 6, 0.25);
+  box-shadow: 0 18px 30px -12px rgba(217, 119, 6, 0.35);
+}
+:host-context(.dark) .pending-3d__lock-body {
+  color: #fbbf24;
+  background: linear-gradient(145deg, rgba(251, 191, 36, 0.22), rgba(251, 191, 36, 0.06));
+  border-color: rgba(251, 191, 36, 0.25);
+}
+
+.pending-3d__orbit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1px;
+  height: 1px;
+  transform-style: preserve-3d;
+  animation: pendingOrbitSpin 9s linear infinite;
+}
+.pending-3d__orbit--azure {
+  animation-delay: 0s;
+}
+.pending-3d__orbit--aws {
+  animation-delay: -4.5s;
+}
+@keyframes pendingOrbitSpin {
+  from { transform: translate(-50%, -50%) rotateY(0deg); }
+  to   { transform: translate(-50%, -50%) rotateY(360deg); }
+}
+
+.pending-3d__chip {
+  position: absolute;
+  width: 2.25rem;
+  height: 2.25rem;
+  margin: -1.125rem 0 0 -1.125rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 16px -6px rgba(15, 23, 42, 0.25);
+  animation: pendingChipCounterSpin 9s linear infinite;
+}
+:host-context(.dark) .pending-3d__chip {
+  background: rgba(30, 41, 59, 0.9);
+}
+.pending-3d__chip--azure {
+  animation-delay: 0s;
+}
+.pending-3d__chip--aws {
+  animation-delay: -4.5s;
+}
+@keyframes pendingChipCounterSpin {
+  from { transform: translateX(80px) translateZ(20px) rotateY(0deg); }
+  to   { transform: translateX(80px) translateZ(20px) rotateY(-360deg); }
+}
+
+/* Azure + AWS: Uiverse.io by dylanharriscameron — frosted glass + bouncing blob */
+.provider-card--azure {
+  width: 200px;
+  height: 250px;
+  justify-self: center;
+  padding: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 20px 20px 60px #bebebe, -20px -20px 60px #ffffff;
+}
+:host-context(.dark) .provider-card--azure {
+  box-shadow: 20px 20px 60px #141824, -20px -20px 60px #283047;
+}
+
+.provider-card--azure .provider-card__glow {
+  inset: auto;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background-color: #0089d6;
+  filter: blur(12px);
+  opacity: 1;
+  animation: awsBlobBounce 5s infinite ease;
+}
+
+.provider-card--azure .provider-card__inner {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 190px;
+  height: 240px;
+  min-height: 0;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(24px);
+  border-radius: 10px;
+  outline: 2px solid #ffffff;
+  border: none;
+  padding: 1.25rem 0.75rem;
+}
+:host-context(.dark) .provider-card--azure .provider-card__inner {
+  background: rgba(15, 23, 42, 0.85);
+  outline-color: rgba(255, 255, 255, 0.15);
+}
+.provider-card--azure:hover .provider-card__inner,
+.provider-card--azure:focus-visible .provider-card__inner {
+  transform: none;
+  box-shadow: none;
+}
+
+.provider-card--azure .provider-card__icon-wrap {
+  width: 4.5rem;
+  height: 3rem;
+  margin-bottom: 0.5rem;
+}
+.provider-card--azure h3 {
+  font-size: 1rem;
+  line-height: 1.25;
+  margin-bottom: 0.25rem;
+}
+.provider-card--azure p,
+.provider-card--azure .provider-card__cta {
+  display: none;
+}
+
+.provider-card--aws {
+  width: 200px;
+  height: 250px;
+  justify-self: center;
+  padding: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 20px 20px 60px #bebebe, -20px -20px 60px #ffffff;
+}
+:host-context(.dark) .provider-card--aws {
+  box-shadow: 20px 20px 60px #141824, -20px -20px 60px #283047;
+}
+
+.provider-card--aws .provider-card__glow {
+  inset: auto;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background-color: #ff0000;
+  filter: blur(12px);
+  opacity: 1;
+  animation: awsBlobBounce 5s infinite ease;
+}
+@keyframes awsBlobBounce {
+  0%   { transform: translate(-100%, -100%) translate3d(0, 0, 0); }
+  25%  { transform: translate(-100%, -100%) translate3d(100%, 0, 0); }
+  50%  { transform: translate(-100%, -100%) translate3d(100%, 100%, 0); }
+  75%  { transform: translate(-100%, -100%) translate3d(0, 100%, 0); }
+  100% { transform: translate(-100%, -100%) translate3d(0, 0, 0); }
+}
+
+.provider-card--aws .provider-card__inner {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 190px;
+  height: 240px;
+  min-height: 0;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(24px);
+  border-radius: 10px;
+  outline: 2px solid #ffffff;
+  border: none;
+  padding: 1.25rem 0.75rem;
+}
+:host-context(.dark) .provider-card--aws .provider-card__inner {
+  background: rgba(15, 23, 42, 0.85);
+  outline-color: rgba(255, 255, 255, 0.15);
+}
+.provider-card--aws:hover .provider-card__inner,
+.provider-card--aws:focus-visible .provider-card__inner {
+  transform: none;
+  box-shadow: none;
+}
+
+.provider-card--aws .provider-card__icon-wrap {
+  width: 4.5rem;
+  height: 3rem;
+  margin-bottom: 0.5rem;
+}
+.provider-card--aws h3 {
+  font-size: 1rem;
+  line-height: 1.25;
+  margin-bottom: 0.25rem;
+}
+.provider-card--aws p,
+.provider-card--aws .provider-card__cta {
+  display: none;
+}

@@ -1,0 +1,148 @@
+/* Adapted from the Uiverse.io "popup" burger-menu pattern (by Galahhad) — same
+   burger-morph-to-X animation and scale/opacity popup entrance, recolored to this
+   app's teal accent palette instead of the original grey/cornflowerblue, and driven
+   by Angular state (isOpen) instead of the raw checkbox-sibling-selector trick. */
+
+.popup {
+  position: relative;
+  display: block;
+  font-family: inherit;
+}
+
+.popup-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.625rem;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: #f8fafc;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+:host-context(.dark) .popup-trigger {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+.popup-trigger:hover {
+  border-color: #00b8a8;
+}
+.popup-trigger--open {
+  border-color: #00b8a8;
+  box-shadow: 0 0 0 3px rgba(0, 228, 208, 0.15);
+}
+
+.popup-trigger__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.burger {
+  --line: 0.125em;
+  --diameter: 1.5em;
+  position: relative;
+  flex: none;
+  width: var(--diameter);
+  height: var(--diameter);
+}
+.burger span {
+  position: absolute;
+  left: 15%;
+  width: 70%;
+  height: var(--line);
+  border-radius: 0.1875em;
+  background: #00b8a8;
+  transition: 0.3s ease;
+}
+:host-context(.dark) .burger span {
+  background: #00e4d0;
+}
+.burger span:nth-child(1) { top: 30%; }
+.burger span:nth-child(2) { bottom: 30%; }
+.burger span:nth-child(3) { top: 50%; transform: translateY(-50%); }
+
+.burger--open span:nth-child(1) {
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+}
+.burger--open span:nth-child(2) {
+  bottom: 50%;
+  transform: translateY(50%) rotate(-45deg);
+}
+.burger--open span:nth-child(3) {
+  transform: translateX(var(--diameter));
+  opacity: 0;
+}
+
+.popup-window {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 0.375rem);
+  left: 0;
+  min-width: 100%;
+  max-height: 16rem;
+  overflow-y: auto;
+  transform: scale(0.85);
+  transform-origin: top left;
+  visibility: hidden;
+  opacity: 0;
+  padding: 0.375rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: #ffffff;
+  box-shadow: 0 16px 34px -10px rgba(15, 23, 42, 0.25);
+  transition: transform 0.15s ease, opacity 0.15s ease, visibility 0.15s ease;
+}
+:host-context(.dark) .popup-window {
+  background: #0f172a;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+.popup-window--open {
+  transform: scale(1);
+  visibility: visible;
+  opacity: 1;
+}
+
+.popup-window ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.popup-window button {
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 0.625rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.popup-window button:hover,
+.popup-window button:focus-visible {
+  background: rgba(0, 228, 208, 0.12);
+  color: #00a89a;
+}
+:host-context(.dark) .popup-window button:hover,
+:host-context(.dark) .popup-window button:focus-visible {
+  color: #00e4d0;
+}
+.popup-window__item--active {
+  font-weight: 700;
+  color: #00a89a;
+}
+:host-context(.dark) .popup-window__item--active {
+  color: #00e4d0;
+}

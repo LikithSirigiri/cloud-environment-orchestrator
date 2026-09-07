@@ -1,0 +1,634 @@
+<div class="space-y-6">
+  <!-- Client Card -->
+  <div class="bg-white dark:bg-slate-900/60 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+    <div class="flex items-center gap-4 mb-6">
+      <div class="w-10 h-10 rounded-xl bg-indigo-900 dark:bg-[#00E4D0]/20 text-white flex items-center justify-center shadow-inner">
+        <lucide-icon name="user" [size]="20"></lucide-icon>
+      </div>
+      <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">Client</h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">Client Name</label>
+        <div class="relative">
+          <input type="text" spellcheck="false" [(ngModel)]="formData.client_name"
+            placeholder="e.g. CLIX, JFS"
+            class="w-full text-slate-700 dark:text-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none shadow-sm transition-all focus:ring-2 focus:ring-[#00E4D0]/20"
+            [ngClass]="formData.client_name ? 'bg-emerald-50/50 border border-emerald-400' : 'bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-[#00E4D0]'" />
+          <lucide-icon *ngIf="formData.client_name" name="check" [size]="18"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500"></lucide-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Azure Authentication Card -->
+  <div class="bg-white dark:bg-slate-900/60 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+    <div class="flex items-center gap-4 mb-6">
+      <div class="w-10 h-10 rounded-xl bg-indigo-900 dark:bg-[#00E4D0]/20 text-white flex items-center justify-center shadow-inner">
+        <lucide-icon name="key" [size]="20"></lucide-icon>
+      </div>
+      <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">Azure Authentication</h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">Subscription ID</label>
+        <input type="text" spellcheck="false" [(ngModel)]="azureCredentials.subscriptionId" (change)="saveCredentials()"
+          class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00E4D0]/20 focus:border-[#00E4D0] transition-all" />
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">Tenant ID</label>
+        <input type="text" spellcheck="false" [(ngModel)]="azureCredentials.tenantId" (change)="saveCredentials()"
+          class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00E4D0]/20 focus:border-[#00E4D0] transition-all" />
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">Client ID</label>
+        <input type="text" spellcheck="false" [(ngModel)]="azureCredentials.clientId" (change)="saveCredentials()"
+          class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00E4D0]/20 focus:border-[#00E4D0] transition-all" />
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">Client Secret</label>
+        <input type="password" spellcheck="false" [(ngModel)]="azureCredentials.clientSecret" (change)="saveCredentials()"
+          class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00E4D0]/20 focus:border-[#00E4D0] transition-all" />
+      </div>
+    </div>
+  </div>
+  <!-- Resource Group Card -->
+  <div class="bg-white dark:bg-slate-900/60 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+    <div class="flex items-center gap-4 mb-6">
+      <div class="w-10 h-10 rounded-xl bg-indigo-900 dark:bg-[#00E4D0]/20 text-white flex items-center justify-center shadow-inner">
+        <lucide-icon name="folder" [size]="20"></lucide-icon>
+      </div>
+      <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">Resource Group & Location</h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">Resource Group (default, used unless a VM has its own override below)</label>
+        <div class="relative">
+          <input type="text" spellcheck="false" [(ngModel)]="formData.resource_group_name"
+            class="w-full text-slate-700 dark:text-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none shadow-sm transition-all focus:ring-2 focus:ring-[#00E4D0]/20"
+            [ngClass]="formData.resource_group_name ? 'bg-emerald-50/50 border border-emerald-400' : 'bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-[#00E4D0]'" />
+          <lucide-icon *ngIf="formData.resource_group_name" name="check" [size]="18"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500"></lucide-icon>
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">Location</label>
+        <div class="relative">
+          <select [(ngModel)]="formData.location" (change)="onLocationChange()"
+            class="w-full appearance-none text-slate-700 dark:text-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none shadow-sm transition-all focus:ring-2 focus:ring-[#00E4D0]/20"
+            [ngClass]="formData.location ? 'bg-emerald-50/50 border border-emerald-400' : 'bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-[#00E4D0]'">
+            <option [ngValue]="undefined" disabled>Select Location</option>
+            <option value="jioindiawest">(Asia Pacific) Jio India West</option>
+            <option value="jioindiacentral">(Asia Pacific) Jio India Central</option>
+            <option value="centralindia">(Asia Pacific) Central India</option>
+            <option value="southindia">(Asia Pacific) South India</option>
+            <option value="eastus">(US) East US</option>
+            <option value="eastus2">(US) East US 2</option>
+            <option value="centralus">(US) Central US</option>
+            <option value="westeurope">(Europe) West Europe</option>
+          </select>
+          <lucide-icon name="chevron-down" [size]="18"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 pointer-events-none"></lucide-icon>
+          <lucide-icon *ngIf="formData.location" name="check" [size]="18"
+            class="absolute right-10 top-1/2 -translate-y-1/2 text-emerald-500"></lucide-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Networking Card -->
+  <div class="bg-white dark:bg-slate-900/60 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+    <div class="flex items-center gap-4 mb-6">
+      <div class="w-10 h-10 rounded-xl bg-indigo-900 dark:bg-[#00E4D0]/20 text-white flex items-center justify-center shadow-inner">
+        <lucide-icon name="network" [size]="20"></lucide-icon>
+      </div>
+      <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">Networking Configuration</h2>
+    </div>
+
+    <div class="max-w-3xl">
+      <div class="space-y-6">
+        <div class="space-y-4">
+          <!-- VNet -->
+          <div class="p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30">
+            <div class="flex items-center gap-2 mb-2">
+              <input type="checkbox" id="create-vnet" [(ngModel)]="formData.create_vnet"
+                class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-[#00E4D0] focus:ring-[#00E4D0]/40" />
+              <label for="create-vnet" class="text-xs font-bold text-slate-900 dark:text-slate-100 cursor-pointer">Create a new VNet</label>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-900 dark:text-slate-100 mb-2">
+                  VNet Name {{ formData.create_vnet ? '(new)' : '(existing)' }}
+                </label>
+                <input type="text" spellcheck="false" [(ngModel)]="formData.vnet_name"
+                  class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00E4D0]/20 focus:border-[#00E4D0] transition-all" />
+              </div>
+              <div *ngIf="formData.create_vnet">
+                <label class="block text-xs font-bold text-slate-900 dark:text-slate-100 mb-2">Address Space (CIDR)</label>
+                <input type="text" spellcheck="false" [(ngModel)]="formData.vnet_address_space" placeholder="e.g. 10.0.0.0/16"
+                  class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00E4D0]/20 focus:border-[#00E4D0] transition-all" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Subnet -->
+          <div class="p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30">
+            <div class="flex items-center gap-2 mb-2">
+              <input type="checkbox" id="create-subnet" [(ngModel)]="formData.create_subnet"
+                class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-[#00E4D0] focus:ring-[#00E4D0]/40" />
+              <label for="create-subnet" class="text-xs font-bold text-slate-900 dark:text-slate-100 cursor-pointer">Create a new subnet</label>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-900 dark:text-slate-100 mb-2">
+                  Subnet Name {{ formData.create_subnet ? '(new)' : '(existing)' }}
+                </label>
+                <input type="text" spellcheck="false" [(ngModel)]="formData.subnet_name"
+                  class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00E4D0]/20 focus:border-[#00E4D0] transition-all" />
+              </div>
+              <div *ngIf="formData.create_subnet">
+                <label class="block text-xs font-bold text-slate-900 dark:text-slate-100 mb-2">Address Prefix (CIDR)</label>
+                <input type="text" spellcheck="false" [(ngModel)]="formData.subnet_address_prefix" placeholder="e.g. 10.0.1.0/24"
+                  class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00E4D0]/20 focus:border-[#00E4D0] transition-all" />
+              </div>
+            </div>
+          </div>
+
+          <!-- NAT Gateway -->
+          <div class="p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30">
+            <div class="flex items-center gap-2 mb-2">
+              <input type="checkbox" id="create-nat" [(ngModel)]="formData.create_nat_gateway"
+                class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-[#00E4D0] focus:ring-[#00E4D0]/40" />
+              <label for="create-nat" class="text-xs font-bold text-slate-900 dark:text-slate-100 cursor-pointer">Create a new NAT Gateway</label>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-900 dark:text-slate-100 mb-2">
+                NAT Gateway Name {{ formData.create_nat_gateway ? '(new)' : '(existing)' }}
+              </label>
+              <input type="text" spellcheck="false" [(ngModel)]="formData.nat_gateway_name"
+                class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00E4D0]/20 focus:border-[#00E4D0] transition-all" />
+            </div>
+          </div>
+
+          <div>
+            <label class="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-slate-100 mb-2">
+              Storage Account Name <lucide-icon name="info" [size]="14" class="text-slate-500 dark:text-slate-400"></lucide-icon>
+            </label>
+            <input type="text" spellcheck="false" [(ngModel)]="formData.storage_account_name"
+              class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00E4D0]/20 focus:border-[#00E4D0] transition-all" />
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Layout -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+    <!-- VM Config Card -->
+    <div class="bg-white dark:bg-slate-900/60 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col h-full">
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-10 h-10 rounded-xl bg-indigo-900 dark:bg-[#00E4D0]/20 text-white flex items-center justify-center shadow-inner">
+          <lucide-icon name="monitor" [size]="20"></lucide-icon>
+        </div>
+        <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">Virtual Machine Configuration</h2>
+      </div>
+
+      <div class="space-y-5 flex-1">
+        <div class="mb-2">
+          <label class="block text-xs font-bold text-slate-900 dark:text-slate-100 mb-2">How many VMs do you need?</label>
+          <input type="number" min="0" [(ngModel)]="vmCount" (change)="onVmCountChange()"
+            class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00E4D0]/20 focus:border-[#00E4D0] transition-all" />
+        </div>
+
+        <div *ngIf="vmConfigs.length > 0" class="space-y-4 overflow-y-auto max-h-[250px] pr-2 scrollbar-thin scrollbar-thumb-slate-200 p-2 bg-slate-50/50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+          <div *ngFor="let vm of vmConfigs; let i = index" class="flex gap-2 items-center">
+            <div class="grid grid-cols-3 gap-4 bg-white dark:bg-slate-900/60 p-3 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm flex-1">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">VM Name</label>
+                <input type="text" spellcheck="false" [(ngModel)]="vm.name" placeholder="e.g. app-server-1"
+                  class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00E4D0]/20 focus:border-[#00E4D0] transition-all" />
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">VM Size</label>
+                <app-vm-size-dropdown [subscriptionId]="azureCredentials.subscriptionId"
+                  [region]="formData.location" [(selectedValue)]="vm.size"></app-vm-size-dropdown>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">OS Disk Size</label>
+                <div class="relative">
+                  <select [(ngModel)]="vm.os_disk_size"
+                    class="w-full appearance-none bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00E4D0]/20 focus:border-[#00E4D0] transition-all">
+                    <option [ngValue]="undefined" disabled>Select disk size</option>
+                    <option *ngFor="let size of diskSizes" [value]="size">{{size}}</option>
+                  </select>
+                  <lucide-icon name="chevron-down" [size]="16"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 pointer-events-none"></lucide-icon>
+                </div>
+              </div>
+              <div class="col-span-3">
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Resource Group (optional override)</label>
+                <input type="text" spellcheck="false" [(ngModel)]="vm.resource_group_name"
+                  placeholder="Leave blank to use the default Resource Group above"
+                  class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-3 py-2 text-[11px] focus:outline-none focus:ring-2 focus:ring-[#00E4D0]/20 focus:border-[#00E4D0] transition-all" />
+              </div>
+              <div class="col-span-3 flex items-center gap-2">
+                <input type="checkbox" [id]="'public-ip-' + i" [(ngModel)]="vm.needs_public_ip"
+                  class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-[#00E4D0] focus:ring-[#00E4D0]/40" />
+                <label [for]="'public-ip-' + i" class="text-[11px] font-semibold text-slate-600 dark:text-slate-400 cursor-pointer">
+                  Assign a public IP (optional)
+                </label>
+              </div>
+              <div class="col-span-3 flex flex-col gap-2" *ngIf="vm.needs_public_ip">
+                <div class="flex gap-4">
+                  <label class="flex items-center gap-1.5 cursor-pointer">
+                    <input type="radio" [name]="'pip-mode-' + i" value="new" [(ngModel)]="vm.public_ip_mode"
+                      class="w-3.5 h-3.5 text-[#00E4D0] border-slate-300 focus:ring-[#00E4D0]" />
+                    <span class="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Create new</span>
+                  </label>
+                  <label class="flex items-center gap-1.5 cursor-pointer">
+                    <input type="radio" [name]="'pip-mode-' + i" value="existing" [(ngModel)]="vm.public_ip_mode"
+                      class="w-3.5 h-3.5 text-[#00E4D0] border-slate-300 focus:ring-[#00E4D0]" />
+                    <span class="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Use existing</span>
+                  </label>
+                </div>
+                <input *ngIf="vm.public_ip_mode === 'existing'" type="text" spellcheck="false" [(ngModel)]="vm.existing_public_ip_name"
+                  placeholder="Existing Public IP resource name"
+                  class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-3 py-2 text-[11px] focus:outline-none focus:ring-2 focus:ring-[#00E4D0]/20 focus:border-[#00E4D0] transition-all" />
+              </div>
+            </div>
+            <button (click)="removeVm(i)"
+              class="p-2 bg-rose-50 text-rose-500 rounded-lg hover:bg-rose-100 hover:text-rose-700 transition-colors border border-rose-100 shadow-sm shrink-0" title="Remove VM">
+              <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 mt-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-900 dark:text-slate-100 mb-2">Username</label>
+            <input type="text" spellcheck="false" [(ngModel)]="formData.vm_admin_username"
+              class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00E4D0]/20 focus:border-[#00E4D0] transition-all" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="col-span-2">
+            <label class="block text-xs font-bold text-slate-900 dark:text-slate-100 mb-2">Authentication Type</label>
+            <div class="flex gap-4 mb-4">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="authType" value="ssh_key" [(ngModel)]="formData.vm_authentication_type"
+                  class="w-4 h-4 text-[#00E4D0] border-slate-300 focus:ring-[#00E4D0]">
+                <span class="text-sm text-slate-700 dark:text-slate-300">SSH public key</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="authType" value="password" [(ngModel)]="formData.vm_authentication_type"
+                  class="w-4 h-4 text-[#00E4D0] border-slate-300 focus:ring-[#00E4D0]">
+                <span class="text-sm text-slate-700 dark:text-slate-300">Password</span>
+              </label>
+            </div>
+            
+            <div class="relative" *ngIf="formData.vm_authentication_type === 'password'">
+              <input [type]="showVmAdminPassword ? 'text' : 'password'" placeholder="Password" [(ngModel)]="formData.vm_admin_password"
+                class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00E4D0]/20 focus:border-[#00E4D0] transition-all" />
+              <lucide-icon [name]="showVmAdminPassword ? 'eye' : 'eye-off'" [size]="16"
+                (click)="showVmAdminPassword = !showVmAdminPassword"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 cursor-pointer hover:text-slate-700 dark:text-slate-300 transition-colors"></lucide-icon>
+            </div>
+
+            <div *ngIf="formData.vm_authentication_type === 'ssh_key'">
+              <div class="flex gap-2">
+                <input type="text" spellcheck="false" placeholder="Name the SSH public key" [(ngModel)]="formData.vm_ssh_key_name"
+                  class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00E4D0]/20 focus:border-[#00E4D0] transition-all" />
+                <button (click)="downloadPem()" *ngIf="formData.vm_ssh_key_name"
+                  class="flex items-center gap-2 px-4 py-2 bg-indigo-50 dark:bg-[#00E4D0]/5 text-[#00E4D0] border border-indigo-200 dark:border-[#00E4D0]/30 rounded-lg text-sm font-semibold hover:bg-indigo-100 dark:bg-[#00E4D0]/10 transition-colors shrink-0" title="Download PEM File">
+                  <lucide-icon name="download" [size]="16"></lucide-icon>
+                  Download .pem
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-900 dark:text-slate-100 mb-2">OS disk type</label>
+            <div class="relative">
+              <select [(ngModel)]="formData.disk_type"
+                class="w-full appearance-none bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00E4D0]/20 focus:border-[#00E4D0] transition-all">
+                <option [ngValue]="undefined" disabled>Select OS disk type</option>
+                <option value="Premium SSD">Premium SSD (locally-redundant storage)</option>
+                <option value="Standard SSD">Standard SSD (locally-redundant storage)</option>
+                <option value="Standard HDD">Standard HDD (locally-redundant storage)</option>
+              </select>
+              <lucide-icon name="chevron-down" [size]="16"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 pointer-events-none"></lucide-icon>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- IP Replacement Card -->
+    <div class="bg-white dark:bg-slate-900/60 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col h-full">
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-10 h-10 rounded-xl bg-indigo-900 dark:bg-[#00E4D0]/20 text-white flex items-center justify-center shadow-inner">
+          <lucide-icon name="repeat" [size]="20"></lucide-icon>
+        </div>
+        <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">IP Replacement</h2>
+      </div>
+
+      <div class="mb-6">
+        <label class="block text-xs font-bold text-slate-900 dark:text-slate-100 mb-2">Number of Servers</label>
+        <input type="number" min="0" [(ngModel)]="ipReplacementCount" (change)="onIpReplacementCountChange()"
+          class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00E4D0]/20 focus:border-[#00E4D0] transition-all" />
+      </div>
+
+      <div class="space-y-4 overflow-y-auto max-h-[300px] pr-2 scrollbar-thin scrollbar-thumb-slate-200">
+        <div *ngFor="let item of ipReplacements; let i = index" class="flex gap-2 items-center">
+          <div class="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex-1">
+            <div>
+              <label class="block text-xs font-bold text-slate-900 dark:text-slate-100 mb-1">Server Name</label>
+              <input type="text" spellcheck="false" [(ngModel)]="item.serverName" placeholder="e.g. acme-web-server-dr"
+                class="w-full bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00E4D0]/20 focus:border-[#00E4D0] transition-all" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-900 dark:text-slate-100 mb-1">Old IP Address</label>
+              <input type="text" spellcheck="false" [(ngModel)]="item.ipAddress" placeholder="e.g. 20.244.177.175"
+                class="w-full bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00E4D0]/20 focus:border-[#00E4D0] transition-all" />
+            </div>
+          </div>
+          <button (click)="removeIpReplacement(i)" 
+            class="p-2 bg-rose-50 text-rose-500 rounded-lg hover:bg-rose-100 hover:text-rose-700 transition-colors border border-rose-100 shadow-sm shrink-0" title="Remove IP Replacement">
+            <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+          </button>
+        </div>
+        <div *ngIf="ipReplacements.length === 0" class="flex flex-col items-center justify-center py-8 text-slate-500 dark:text-slate-400">
+          <lucide-icon name="ghost" [size]="32" class="mb-2 opacity-50"></lucide-icon>
+          <p class="text-sm">No servers configured for replacement</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Database Configuration Card -->
+  <div class="bg-white dark:bg-slate-900/60 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 mt-8">
+    <div class="flex items-center gap-4 mb-6">
+      <div class="w-10 h-10 rounded-xl bg-indigo-900 dark:bg-[#00E4D0]/20 text-white flex items-center justify-center shadow-inner">
+        <lucide-icon name="database" [size]="20"></lucide-icon>
+      </div>
+      <div>
+        <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">Database Configuration</h2>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div>
+        <label class="block text-xs font-bold text-slate-900 dark:text-slate-100 mb-2">MongoDB Server Count</label>
+        <input type="number" min="0" [(ngModel)]="formData.mongo_server_count"
+          class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00E4D0]/20 focus:border-[#00E4D0] transition-all" />
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-900 dark:text-slate-100 mb-2">MongoDB Resource Group (optional override)</label>
+        <input type="text" spellcheck="false" [(ngModel)]="formData.mongo_resource_group_name"
+          placeholder="Leave blank to use the default Resource Group"
+          class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00E4D0]/20 focus:border-[#00E4D0] transition-all" />
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-900 dark:text-slate-100 mb-2">MongoDB Version</label>
+        <div class="relative">
+          <select [(ngModel)]="formData.mongo_version"
+            class="w-full appearance-none bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00E4D0]/20 focus:border-[#00E4D0] transition-all">
+            <option *ngFor="let version of mongoVersions" [value]="version">{{version}}</option>
+          </select>
+          <lucide-icon name="chevron-down" [size]="16"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 pointer-events-none"></lucide-icon>
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-900 dark:text-slate-100 mb-2">MongoDB VM Size</label>
+        <app-vm-size-dropdown [subscriptionId]="azureCredentials.subscriptionId"
+          [region]="formData.location" [(selectedValue)]="formData.mongo_vm_size"></app-vm-size-dropdown>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-900 dark:text-slate-100 mb-2">OS Disk Size (GB)</label>
+        <div class="relative">
+          <select [(ngModel)]="formData.mongo_os_disk_size"
+            class="w-full appearance-none bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00E4D0]/20 focus:border-[#00E4D0] transition-all">
+            <option [ngValue]="undefined" disabled>Select disk size</option>
+            <option *ngFor="let size of diskSizes" [value]="size">{{size}}</option>
+          </select>
+          <lucide-icon name="chevron-down" [size]="16"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 pointer-events-none"></lucide-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Terraform Actions Bar -->
+  <div class="flex items-center justify-between bg-white dark:bg-slate-900/60 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-700 mt-8">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-[#00E4D0]/10 text-[#00E4D0] flex items-center justify-center">
+        <lucide-icon name="clipboard-list" [size]="16"></lucide-icon>
+      </div>
+      <span class="font-bold text-slate-800">Terraform Actions</span>
+    </div>
+    <div class="relative">
+      <button (click)="toggleDropdown()" [disabled]="isDeploying"
+        class="flex items-center justify-between min-w-[140px] gap-2 px-5 py-2.5 bg-indigo-600 dark:bg-[#00E4D0]/90 hover:bg-[#00E4D0] text-white font-bold rounded-lg transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
+        <div class="flex items-center gap-2">
+          <lucide-icon *ngIf="isDeploying" name="loader" [size]="16" class="animate-spin"></lucide-icon>
+          <lucide-icon *ngIf="!isDeploying" name="zap" [size]="16"></lucide-icon>
+          <span>Actions</span>
+        </div>
+        <lucide-icon name="chevron-down" [size]="16" [class.rotate-180]="showActionDropdown" class="transition-transform"></lucide-icon>
+      </button>
+
+      <!-- Dropdown Menu -->
+      <div *ngIf="showActionDropdown" 
+        class="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-slate-900/60 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden z-20 origin-top-right animate-in fade-in zoom-in-95 duration-100">
+        <div class="p-1">
+          <button (click)="startDeployment('plan'); toggleDropdown()" 
+            class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:bg-slate-800 hover:text-[#00E4D0] rounded-lg transition-colors text-left">
+            <lucide-icon name="clipboard-list" [size]="16" [strokeWidth]="2"></lucide-icon>
+            Plan
+          </button>
+          
+          <button (click)="startDeployment('apply'); toggleDropdown()" 
+            class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:bg-slate-800 hover:text-[#00E4D0] rounded-lg transition-colors text-left">
+            <lucide-icon name="play-circle" [size]="16" [strokeWidth]="2"></lucide-icon>
+            Apply
+          </button>
+
+          <div class="h-px bg-slate-100 my-1 mx-2"></div>
+          
+          <button (click)="initiateDestroy()" 
+            class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-rose-600 hover:bg-rose-50 rounded-lg transition-colors text-left">
+            <lucide-icon name="trash-2" [size]="16" [strokeWidth]="2"></lucide-icon>
+            Destroy
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JSON Preview Box -->
+  <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-xl shadow-slate-200/40 border border-slate-100 dark:border-slate-800 overflow-hidden mt-8">
+    <div class="flex justify-between items-center px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+      <div class="flex items-center gap-2 text-slate-900 dark:text-white">
+        <lucide-icon name="code-2" [size]="18" class="text-[#00E4D0]"></lucide-icon>
+        <span class="font-semibold text-sm tracking-wide">Configuration Preview</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <button (click)="pasteJson()"
+          class="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-3 py-1.5 rounded-md transition-colors border border-slate-200 dark:border-slate-700">
+          <lucide-icon name="clipboard" [size]="14"></lucide-icon> Paste JSON
+        </button>
+        <button (click)="downloadJson()"
+          class="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-3 py-1.5 rounded-md transition-colors border border-slate-200 dark:border-slate-700">
+          <lucide-icon name="download" [size]="14"></lucide-icon> Download JSON
+        </button>
+      </div>
+    </div>
+    <div class="p-6 overflow-auto max-h-[400px] text-[13px] font-mono leading-relaxed bg-[#1E1E1E] text-indigo-100">
+      <pre>{{ formData | json }}</pre>
+    </div>
+  </div>
+
+  <!-- Deployment Logs Terminal -->
+  <div class="bg-[#1E1E1E] rounded-2xl shadow-xl shadow-indigo-900/10 border border-slate-100 dark:border-slate-800 overflow-hidden mt-8 flex flex-col h-[400px]">
+    <div class="flex items-center px-4 py-3 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 shrink-0">
+      <div class="flex gap-2">
+        <div class="w-3 h-3 rounded-full bg-red-500"></div>
+        <div class="w-3 h-3 rounded-full bg-amber-500"></div>
+        <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+      </div>
+      <div class="ml-4 flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 font-mono tracking-wider">
+        <lucide-icon name="terminal" [size]="14" class="text-[#00E4D0]"></lucide-icon>
+        terraform deployment
+      </div>
+      <label class="ml-auto flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 cursor-pointer">
+        <input type="checkbox" [(ngModel)]="formData.stream_full_logs"
+          class="w-3.5 h-3.5 rounded border-slate-300 dark:border-slate-600 text-[#00E4D0] focus:ring-[#00E4D0]/40" />
+        Stream full logs
+      </label>
+    </div>
+    
+    <div class="flex-1 p-4 bg-[#1E1E1E] overflow-y-auto font-mono text-[13px] leading-relaxed relative">
+      <div *ngIf="deploymentLogs.length === 0 && !isDeploying" class="absolute inset-0 flex items-center justify-center text-slate-500 dark:text-slate-400">
+        Ready to deploy infrastructure.
+      </div>
+      
+      <div *ngFor="let log of deploymentLogs" class="text-indigo-300 hover:text-indigo-200 transition-colors"
+        [class.text-emerald-400]="log.includes('complete!') || log.includes('Success')"
+        [class.text-amber-300]="log.includes('Plan:')"
+        [class.text-red-400]="log.includes('[ERROR]') || log.includes('Error')">
+        {{log}}
+      </div>
+      <div *ngIf="isDeploying" class="mt-2 flex items-center gap-2 text-[#00E4D0] animate-pulse">
+        <span class="w-2 h-4 bg-indigo-400 inline-block"></span> Processing...
+      </div>
+    </div>
+  </div>
+
+  <!-- State Unlock Alert -->
+  <div *ngIf="lockIdFromLogs" class="bg-rose-50 border-l-4 border-rose-500 rounded-r-xl shadow-sm overflow-hidden mt-4 animate-in fade-in slide-in-from-top-4 duration-300">
+    <div class="flex items-start p-4">
+      <div class="flex-shrink-0 mt-0.5">
+        <lucide-icon name="lock" [size]="20" class="text-rose-500"></lucide-icon>
+      </div>
+      <div class="ml-3 flex-1">
+        <h3 class="text-sm font-bold text-rose-800">Terraform State Lock Detected</h3>
+        <div class="mt-1 text-xs text-rose-700 font-medium">
+          <p>A previous operation failed to release the state lock. You cannot proceed until it is unlocked.</p>
+          <p class="font-mono mt-1 opacity-80">Lock ID: {{ lockIdFromLogs }}</p>
+        </div>
+        <div class="mt-3">
+          <button (click)="forceUnlock(lockIdFromLogs)" [disabled]="isUnlocking"
+            class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-md bg-rose-600 text-white hover:bg-rose-700 focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 focus:outline-none transition-colors disabled:opacity-70 disabled:cursor-not-allowed">
+            <lucide-icon *ngIf="!isUnlocking" name="unlock" [size]="14"></lucide-icon>
+            <lucide-icon *ngIf="isUnlocking" name="loader-2" [size]="14" class="animate-spin"></lucide-icon>
+            {{ isUnlocking ? 'Unlocking...' : 'Force Unlock State' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Deployment Outputs Panel -->
+  <div *ngIf="deploymentOutputs" class="bg-white dark:bg-slate-900/60 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden mt-8">
+    <div class="flex items-center px-6 py-4 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+      <lucide-icon name="server" [size]="20" class="text-emerald-600 mr-3"></lucide-icon>
+      <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">Deployment Outputs (Server IPs)</h2>
+    </div>
+    <div class="p-6 overflow-auto max-h-[400px]">
+      <div *ngFor="let output of deploymentOutputs | keyvalue" class="mb-6 last:mb-0">
+        <h3 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">{{ output.key }}</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div *ngFor="let ip of output.value | keyvalue" class="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3 flex flex-col gap-1">
+            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ ip.key }}</span>
+            <span class="text-sm font-mono text-slate-900 dark:text-slate-100">{{ ip.value }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Destroy Confirmation Modal -->
+  <div *ngIf="showDestroyModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div class="bg-white dark:bg-slate-900/60 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+      <div class="px-6 py-4 bg-rose-50 border-b border-rose-100 flex items-center gap-3 shrink-0">
+        <div class="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center shrink-0">
+          <lucide-icon name="alert-triangle" [size]="20" class="text-rose-600"></lucide-icon>
+        </div>
+        <div>
+          <h2 class="text-lg font-bold text-rose-900">Confirm Destruction</h2>
+          <p class="text-sm text-rose-700 font-medium">The following resources will be deleted. Do you want to proceed?</p>
+        </div>
+      </div>
+      
+      <div class="p-6 overflow-y-auto bg-slate-50 dark:bg-slate-800 flex-1">
+        <div *ngIf="isFetchingState" class="flex flex-col items-center justify-center py-12 text-slate-500 dark:text-slate-400">
+          <lucide-icon name="loader-2" [size]="32" class="animate-spin mb-4 text-[#00E4D0]"></lucide-icon>
+          <p class="text-sm font-semibold">Retrieving current state from Azure...</p>
+        </div>
+        
+        <div *ngIf="stateFetchError" class="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200 text-sm">
+          <p class="font-bold mb-1">Failed to fetch state:</p>
+          <p>{{ stateFetchError }}</p>
+          <p class="mt-4 text-xs font-semibold">You can still proceed to force a destroy, but we cannot preview the resources.</p>
+        </div>
+
+        <div *ngIf="!isFetchingState && !stateFetchError && destroyResources.length === 0" class="text-center py-8 text-slate-500 dark:text-slate-400">
+          <p class="text-sm font-semibold mb-1">No resources found in state.</p>
+          <p class="text-xs">Terraform currently tracks 0 resources. The infrastructure may already be destroyed.</p>
+        </div>
+
+        <div *ngIf="!isFetchingState && destroyResources.length > 0" class="space-y-2">
+          <div *ngFor="let res of destroyResources" class="bg-white dark:bg-slate-900/60 p-3 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm flex items-start gap-3">
+            <lucide-icon name="box" [size]="16" class="text-slate-500 dark:text-slate-400 mt-0.5 shrink-0"></lucide-icon>
+            <div class="min-w-0">
+              <p class="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">{{ res.name || res.address }}</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400 font-mono mt-1">{{ res.type }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="px-6 py-4 bg-white dark:bg-slate-900/60 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3 shrink-0">
+        <button (click)="cancelDestroy()" class="px-5 py-2 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200 dark:border-slate-700">
+          No, Cancel
+        </button>
+        <button (click)="confirmDestroy()" class="px-5 py-2 text-sm font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-sm transition-colors flex items-center gap-2">
+          <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+          Yes, Destroy
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

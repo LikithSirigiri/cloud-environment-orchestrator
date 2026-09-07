@@ -1,0 +1,259 @@
+#cloud-config
+package_upgrade: true
+
+packages:
+  - wget
+  - apt-transport-https
+
+write_files:
+  - path: /opt/dr-provision.sh
+    permissions: '0700'
+    content: |
+      #!/bin/bash
+      # this all runs as one script instead of separate runcmd items so `set -e`
+      # actually stops on the first failure - cloud-init's runcmd module does NOT
+      # do that across list items, a failed one just gets logged and it moves on,
+      # still reporting overall "done".
+      set -euo pipefail
+
+      STATUS_FILE=/var/lib/cloud/dr_provision_status
+      echo "FAILED: provisioning did not complete" > "$STATUS_FILE"
+
+      echo "[INFO] Installing blobfuse2..."
+      wget https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb
+      dpkg -i packages-microsoft-prod.deb
+      apt-get update
+      apt-get install -y blobfuse2
+
+      mkdir -p /etc/blobfuse2
+      cat << 'BFEOF' > /etc/blobfuse2/blobfuse2.yaml
+      allow-other: true
+      logging:
+        type: syslog
+        level: log_debug
+      components:
+        - libfuse
+        - file_cache
+        - attr_cache
+        - azstorage
+      libfuse:
+        attribute-expiration-sec: 120
+        entry-expiration-sec: 120
+        negative-entry-expiration-sec: 240
+      file_cache:
+        path: /mnt/resource/blobfuse2tmp
+        timeout-sec: 120
+        max-size-mb: 4096
+      attr_cache:
+        timeout-sec: 7200
+      azstorage:
+        type: block
+        account-name: ${storage_account_name}
+        account-key: ${storage_account_key}
+        container: ${container_name}
+        mode: key
+        endpoint: https://${storage_account_name}.blob.core.windows.net/
+      BFEOF
+      chmod 600 /etc/blobfuse2/blobfuse2.yaml
+
+      mkdir -p /mnt/resource/blobfuse2tmp
+      mkdir -p ${mount_path}
+      chown -R ${admin_username}:${admin_username} ${mount_path}
+
+      echo "[INFO] Mounting blob container '${container_name}' at ${mount_path}..."
+      blobfuse2 mount ${mount_path} --config-file=/etc/blobfuse2/blobfuse2.yaml
+      sleep 3
+      mountpoint -q ${mount_path} || { echo "[ERROR] ${mount_path} is not mounted after blobfuse2 mount"; exit 1; }
+      if [ -z "$(ls -A ${mount_path} 2>/dev/null)" ]; then
+        echo "[ERROR] Mounted container '${container_name}' is empty, check that this is the right container name and that it actually holds the expected files"
+        exit 1
+      fi
+
+      cat << 'SVCEOF' > /etc/systemd/system/blobfuse2.service
+      [Unit]
+      Description=Blobfuse2 mount for Azure Storage
+      After=network.target
+
+      [Service]
+      Type=forking
+      ExecStart=/usr/bin/blobfuse2 mount ${mount_path} --config-file=/etc/blobfuse2/blobfuse2.yaml
+      ExecStop=/usr/bin/blobfuse2 unmount ${mount_path}
+
+      [Install]
+      WantedBy=multi-user.target
+      SVCEOF
+      systemctl daemon-reload
+      systemctl enable blobfuse2.service
+
+      %{ if is_web_or_kong }
+      echo "[INFO] Installing nginx..."
+      apt-get install -y nginx
+      systemctl enable nginx
+      cp ${mount_path}/nginx.conf /etc/nginx/nginx.conf || true
+      %{ else }
+      echo "[INFO] Installing Docker..."
+      curl -fsSL https://get.docker.com -o get-docker.sh
+      VERSION=29.1.3 sh get-docker.sh
+      %{ endif }
+
+      # stashed into a real bash variable so the escaped $${app_data_path%/}
+      # uses below (bash's own trailing-slash strip) have something to expand.
+      # every other ${app_data_path} in this file is terraform's own
+      # interpolation and never touches bash at all.
+      app_data_path="${app_data_path}"
+
+      echo "[INFO] Copying data from Azure Blob Storage to ${app_data_path}..."
+      mkdir -p ${app_data_path}
+      cp -a ${mount_path}/* ${app_data_path}/
+      chmod 755 ${app_data_path}/
+      # SSH key perms are about the admin user's actual home dir, not wherever
+      # blob data ends up - those only used to line up by coincidence, since both
+      # defaulted to /home/ubuntu.
+      chmod -f 700 /home/${admin_username}/.ssh || true
+      chmod -f 600 /home/${admin_username}/.ssh/authorized_keys || true
+
+      # only touch the top-level folders that actually came from the blob
+      # container, never the whole of app_data_path blindly. matters a lot when
+      # app_data_path is "/" (mirroring the container's layout onto real system
+      # paths like /etc) - this way it never wanders into the rest of the VM's
+      # filesystem.
+      BLOB_TOP_NAMES=$(find ${mount_path} -mindepth 1 -maxdepth 1 -printf '%f\n')
+      DEST_PATHS=""
+      for name in $BLOB_TOP_NAMES; do
+        DEST_PATHS="$DEST_PATHS $${app_data_path%/}/$name"
+      done
+
+      # ownership: only the login user's home tree gets chowned to them, which is
+      # normal Linux convention. anything else copied in (say etc/nginx, when
+      # app_data_path is "/") just keeps whatever cp gave it - root, since this
+      # script runs as root - which happens to match what nginx and friends
+      # expect for their config anyway.
+      if [ -d "$${app_data_path%/}/home" ]; then
+        chown -R ${admin_username}:${admin_username} "$${app_data_path%/}/home"
+      fi
+
+      # blob storage has no concept of unix permissions, so blobfuse2 reports
+      # everything as non-executable no matter what it actually needs to be, and
+      # cp just copies that wrong permission along. restore the execute bit on
+      # anything that plausibly needs it (entrypoint/wrapper scripts etc.) across
+      # whatever actually got copied in.
+      find $DEST_PATHS -type f \( -name "*.sh" -o -name "entrypoint*" \) -exec chmod +x {} +
+      echo "[INFO] Copy operation completed successfully."
+
+      if [ -d "${app_data_path}/SSl/SSl" ]; then
+        echo "[INFO] Flattening nested SSl directory..."
+        cp -a ${app_data_path}/SSl/SSl/. ${app_data_path}/SSl/
+        rm -rf ${app_data_path}/SSl/SSl
+        chown -R ${admin_username}:${admin_username} ${app_data_path}/SSl
+      fi
+
+      if [ -d "${app_data_path}/ubuntu" ]; then
+        echo "[INFO] Flattening nested ubuntu directory..."
+        cp -a ${app_data_path}/ubuntu/. ${app_data_path}/
+        rm -rf ${app_data_path}/ubuntu
+        chown -R ${admin_username}:${admin_username} ${app_data_path}/
+      fi
+
+      %{ if !is_web_server }
+      mkdir -p /root/.docker
+      # NOTE: the base64 "auth" values below are REDACTED for this public repo.
+      # the real template had live registry creds baked in here (a private
+      # registry password + a Docker Hub PAT). should be pulled from a secret
+      # manager / CI credential store in production, not committed at all.
+      cat << 'DOCKEREOF' > /root/.docker/config.json
+      {
+              "auths": {
+                      "<your-registry>": {
+                              "auth": "<REDACTED-FOR-PUBLIC-REPO>"
+                      },
+                      "https://index.docker.io/v1/": {
+                              "auth": "<REDACTED-FOR-PUBLIC-REPO>"
+                      }
+              }
+      }
+      DOCKEREOF
+      chmod 600 /root/.docker/config.json
+      %{ endif }
+
+      sync
+      sleep 15
+
+      %{ for old_ip, new_ip in ip_replacements }
+      %{ if is_web_or_kong }
+      sed -i 's/${old_ip}/${new_ip}/g' /etc/nginx/nginx.conf || true
+      %{ endif }
+      %{ if !is_web_server }
+      find $DEST_PATHS -type f \( -name "*.env" -o -name "docker-compose*.yml" -o -name "docker-compose*.yaml" \) -exec sed -i 's/${old_ip}/${new_ip}/g' {} + || true
+      %{ endif }
+      %{ endfor }
+
+      %{ if !is_web_server }
+      # images ship as pre-built .tar.gz archives in a "docker-images" folder
+      # instead of getting pulled from a registry. loading them first means each
+      # image already exists locally under its original name:tag, so the
+      # `docker compose up` below just uses it directly. compose only pulls when
+      # an image is missing locally, so this is what keeps it off the network.
+      echo "[INFO] Loading pre-packaged Docker images from local .tar.gz archives..."
+      DOCKER_IMAGE_DIRS=$(find $DEST_PATHS -type d -iname "docker-images")
+      for img_dir in $DOCKER_IMAGE_DIRS; do
+        for img in "$img_dir"/*.tar.gz; do
+          [ -e "$img" ] || continue
+          echo "[INFO] Loading Docker image from $img..."
+          docker load -i "$img"
+        done
+      done
+
+      echo "[INFO] Starting all Docker containers..."
+      COMPOSE_DIRS=$(find $DEST_PATHS -type f \( -name "docker-compose*.yml" -o -name "docker-compose*.yaml" \) -exec dirname {} \; | sort -u)
+
+      %{ if is_central_server }
+      # central can carry multiple Keycloak version dirs from the DC (e.g.
+      # docker-Keycloak-v20, docker-Keycloak-v26). only their mysql stacks
+      # actually conflict with each other (same host port) - the Keycloak app
+      # itself needs to start no matter which version dir it's in. so we only
+      # skip an older version's *mysql* dir, nothing else.
+      LATEST_KEYCLOAK_VER=$(find $DEST_PATHS -type d -name "docker-Keycloak-v*" -exec basename {} \; | sed -E 's/^docker-Keycloak-v([0-9]+)$/\1/' | sort -n | tail -1)
+      if [ -n "$LATEST_KEYCLOAK_VER" ]; then
+        echo "[INFO] Latest Keycloak version directory detected: docker-Keycloak-v$LATEST_KEYCLOAK_VER"
+      fi
+      %{ endif }
+
+      for dir in $COMPOSE_DIRS; do
+        %{ if is_central_server }
+        KC_VER=$(echo "$dir" | sed -nE 's#.*/docker-Keycloak-v([0-9]+)(/.*)?$#\1#p')
+        if [ -n "$KC_VER" ] && [ "$KC_VER" != "$LATEST_KEYCLOAK_VER" ] && basename "$dir" | grep -qi "mysql"; then
+          echo "[INFO] Skipping legacy MySQL stack (Keycloak v$KC_VER) in $dir (latest is v$LATEST_KEYCLOAK_VER)"
+          continue
+        fi
+        %{ endif }
+        echo "[INFO] Starting containers in $dir..."
+        # --pull never since images came from the .tar.gz load above, not a
+        # registry - fail loudly if one's actually missing rather than quietly
+        # hitting the network.
+        (cd "$dir" && docker compose up -d --pull never)
+
+        echo "[INFO] Verifying containers in $dir are running..."
+        retries=30
+        while [ $retries -gt 0 ]; do
+          if (cd "$dir" && docker compose ps | grep -q "Up"); then
+            echo "[INFO] Containers in $dir are running successfully."
+            break
+          fi
+          echo "[INFO] Waiting for containers in $dir to be Up... ($retries left)"
+          sleep 5
+          retries=$((retries - 1))
+        done
+
+        if [ $retries -eq 0 ]; then
+          echo "[ERROR] Containers in $dir failed to start properly!"
+          exit 1
+        fi
+      done
+      echo "[INFO] All required directories copied and all Docker containers verified running successfully."
+      %{ endif }
+
+      echo "SUCCESS" > "$STATUS_FILE"
+      echo "[INFO] Provisioning completed successfully."
+
+runcmd:
+  - bash /opt/dr-provision.sh

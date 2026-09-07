@@ -1,0 +1,41 @@
+#!/bin/bash
+set -e
+
+# tee output to cloud-init-output.log too
+exec > >(tee -a /var/log/cloud-init-output.log) 2>&1
+
+echo "================================================================="
+echo " Starting MongoDB Initialization via Cloud-Init"
+echo " MongoDB Target Version: ${mongo_version}"
+echo "================================================================="
+
+# grab the major version, e.g. "6.0"
+MONGO_VER="${mongo_version}"
+
+# add the MongoDB GPG key
+echo "Adding MongoDB GPG key for version $MONGO_VER..."
+curl -fsSL https://www.mongodb.org/static/pgp/server-$MONGO_VER.asc | \
+   sudo gpg -o /usr/share/keyrings/mongodb-server-$MONGO_VER.gpg \
+   --dearmor
+
+# add the MongoDB repo for Ubuntu 22.04 (jammy)
+echo "Adding MongoDB repository for Jammy..."
+echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-$MONGO_VER.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/$MONGO_VER multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-$MONGO_VER.list
+
+# refresh apt's package list
+echo "Updating apt package list..."
+sudo apt-get update -y
+
+# install mongodb
+echo "Installing MongoDB $MONGO_VER..."
+sudo apt-get install -y mongodb-org
+
+# start + enable the mongod service
+echo "Starting and enabling MongoDB service..."
+sudo systemctl daemon-reload
+sudo systemctl enable mongod
+sudo systemctl start mongod
+
+echo "================================================================="
+echo " MongoDB Installation Completed Successfully!"
+echo "================================================================="

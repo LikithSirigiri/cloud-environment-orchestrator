@@ -1,0 +1,111 @@
+.admin-alert {
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #dc2626;
+  font-size: 0.875rem;
+}
+:host-context(.dark) .admin-alert {
+  color: #f87171;
+}
+
+.admin-table-card {
+  border-radius: 1.25rem;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  overflow-x: auto;
+}
+:host-context(.dark) .admin-table-card {
+  background: rgba(15, 23, 42, 0.6);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table thead th {
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  padding: 0.875rem 1.5rem;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+  white-space: nowrap;
+}
+:host-context(.dark) .admin-table thead th {
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.admin-table tbody td {
+  padding: 0.875rem 1.5rem;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.04);
+  white-space: nowrap;
+}
+:host-context(.dark) .admin-table tbody td {
+  border-color: rgba(255, 255, 255, 0.04);
+}
+
+.admin-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-table tbody tr {
+  transition: background 0.2s ease;
+}
+.admin-table tbody tr:hover {
+  background: rgba(0, 228, 208, 0.04);
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.status-running {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+.status-provisioning,
+.status-destroying {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+}
+.status-destroyed {
+  background: rgba(100, 116, 139, 0.1);
+  color: #64748b;
+}
+.status-failed {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+:host-context(.dark) .status-running {
+  background: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+}
+:host-context(.dark) .status-provisioning,
+:host-context(.dark) .status-destroying {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+}
+:host-context(.dark) .status-destroyed {
+  background: rgba(148, 163, 184, 0.15);
+  color: #94a3b8;
+}
+:host-context(.dark) .status-failed {
+  background: rgba(248, 113, 113, 0.15);
+  color: #f87171;
+}

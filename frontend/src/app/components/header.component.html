@@ -1,0 +1,107 @@
+<header class="header-bar relative h-[76px] bg-white/90 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 flex items-center justify-between px-6 shrink-0 z-10 w-full shadow-sm">
+  <!-- Left Side: Logo and Title -->
+  <div class="flex items-center animate-fade-in-up" style="animation-delay: 0ms">
+    <!-- Logo -->
+    <a routerLink="/dashboard" class="flex flex-col items-start mr-6" title="Back to dashboard">
+      <div class="flex items-center">
+        <!-- Logo redacted for public showcase; swap in your own asset here -->
+        <img src="/favicon.svg" alt="logo" class="h-16 w-auto object-contain -ml-2 transition-transform duration-300 hover:scale-105">
+      </div>
+    </a>
+
+    <!-- Divider -->
+    <div class="header-divider w-px h-9 bg-gradient-to-b from-transparent via-slate-300 dark:via-slate-700 to-transparent mx-2"></div>
+
+    <!-- Titles -->
+    <div class="flex flex-col ml-4">
+      <span class="text-[16px] font-extrabold text-slate-900 dark:text-slate-100 tracking-tight mb-1.5">Cloud Infrastructure Manager</span>
+      <div class="header-badge">
+        <span class="w-1.5 h-1.5 rounded-full bg-[#00E4D0] animate-pulse-dot"></span>
+        Cloud  Configuration
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Side: User Profile / Auth -->
+  <div class="header-actions flex items-center animate-fade-in-up" style="animation-delay: 120ms" *ngIf="isLoggedIn">
+    <!-- Theme Toggle: BB-8 droid switch (Uiverse.io by Galahhad) -->
+    <label class="bb8-toggle" title="Toggle theme">
+      <input
+        type="checkbox"
+        class="bb8-toggle__checkbox"
+        [checked]="isDarkTheme"
+        (change)="toggleTheme()">
+      <div class="bb8-toggle__container">
+        <div class="bb8-toggle__scenery">
+          <div class="gomrassen"></div>
+          <div class="hermes"></div>
+          <div class="chenini"></div>
+          <div class="bb8-toggle__star"></div>
+          <div class="bb8-toggle__star"></div>
+          <div class="bb8-toggle__star"></div>
+          <div class="bb8-toggle__star"></div>
+          <div class="bb8-toggle__star"></div>
+          <div class="bb8-toggle__star"></div>
+          <div class="bb8-toggle__star"></div>
+          <div class="tatto-1"></div>
+          <div class="tatto-2"></div>
+          <div class="bb8-toggle__cloud"></div>
+          <div class="bb8-toggle__cloud"></div>
+          <div class="bb8-toggle__cloud"></div>
+        </div>
+        <div class="bb8">
+          <div class="bb8__head-container">
+            <div class="bb8__antenna"></div>
+            <div class="bb8__antenna"></div>
+            <div class="bb8__head"></div>
+          </div>
+          <div class="bb8__body"></div>
+        </div>
+        <div class="bb8__shadow"></div>
+      </div>
+    </label>
+
+    <span class="header-actions__divider"></span>
+
+    <div class="flex items-center px-2">
+      <div class="relative mr-2.5">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-50 dark:from-[#00E4D0]/20 dark:to-[#00E4D0]/5 flex items-center justify-center text-indigo-700 dark:text-[#00E4D0] font-bold shadow-sm border border-indigo-200 dark:border-[#00E4D0]/30 transition-transform duration-300 hover:scale-110">
+          {{ userName ? userName.charAt(0) : 'U' }}
+        </div>
+        <span class="avatar-status animate-pulse-dot"></span>
+      </div>
+      <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ userName }}</span>
+    </div>
+
+    <span class="header-actions__divider"></span>
+
+    <a
+      routerLink="/dashboard"
+      class="nav-link flex items-center px-3 py-1.5 text-sm font-medium rounded-lg transition-colors">
+      <lucide-icon name="layout-grid" [size]="15" class="mr-1.5"></lucide-icon>
+      Dashboard
+    </a>
+
+    <a
+      routerLink="/activity"
+      class="nav-link flex items-center px-3 py-1.5 text-sm font-medium rounded-lg transition-colors">
+      <lucide-icon name="clipboard-list" [size]="15" class="mr-1.5"></lucide-icon>
+      Activity
+    </a>
+
+    <a
+      *ngIf="isAdmin"
+      routerLink="/admin"
+      class="admin-link flex items-center px-3 py-1.5 text-sm font-medium rounded-lg transition-colors">
+      <lucide-icon name="shield-check" [size]="15" class="mr-1.5"></lucide-icon>
+      Admin
+    </a>
+
+    <span class="header-actions__divider"></span>
+
+    <button (click)="logout()" class="logout-btn group flex items-center px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 rounded-lg hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-500/10 dark:hover:text-rose-400 transition-colors active:scale-95">
+      <lucide-icon name="log-out" [size]="15" class="logout-btn__icon mr-0 -ml-1 w-0 opacity-0 group-hover:w-4 group-hover:opacity-100 group-hover:mr-1.5"></lucide-icon>
+      Logout
+    </button>
+  </div>
+</header>
